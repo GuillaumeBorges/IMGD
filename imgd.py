@@ -2,7 +2,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from database.maturity import get_ind
-
+import networkx as nx
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade de Governança de Dados')
 df = pd.read_excel('autodiagnostico.xlsx')
@@ -10,7 +12,7 @@ df = pd.read_excel('autodiagnostico.xlsx')
 itens = get_ind()
 
 def pagina_inicio():
-    st.title('Avaliação de Maturidade de Dados')
+    st.title('Infraestrutura Nacional de Dados')
     st.write(
         'Este projeto visa avaliar e acompanhar o nível de maturidade da governança de dados em diferentes organizações.')
     st.subheader('Métricas da Estrutura:')
@@ -18,8 +20,9 @@ def pagina_inicio():
     eixo = st.sidebar.selectbox("Eixo", itens['eixo'].unique())
     df_filtered = itens[itens['eixo'] == eixo]
 
-    cola, colb, colc, cold  = st.columns(4)
+    cola, colb, colc, cold = st.columns(4)
     col3, col4 = st.columns(2)
+    col5, col6 = st.columns(2)
 
     cola.metric('Eixo', itens['eixo'].nunique())
     colb.metric('Tópicos', itens['topico'].nunique())
@@ -36,12 +39,97 @@ def pagina_inicio():
     fig_pie_tp.update_traces(textinfo='percent + value')
     col4.plotly_chart(fig_pie_tp, use_container_width=True)
 
+    with col5:
 
-    # Listar os tópicos avaliados
-    st.markdown("### Itens de Maturidade de Dados")
-    st.write("Aqui está uma breve descrição dos Itens de Maturidade de Dados.")
-    st.dataframe(df_filtered, column_order=['linha','item','topico','eixo'])
+        # Criar um novo grafo direcionado
+        G = nx.DiGraph()
 
+        # Adicionar nós ao grafo
+        G.add_node(eixo)
+        G.add_nodes_from(df_filtered['item'])
+
+        for item in df_filtered['item']:
+            # Adicionar arestas ao grafo
+            G.add_edge(eixo, item)
+
+        # Converter o gráfico do NetworkX para um gráfico do Plotly
+        pos = nx.spring_layout(G)  # Calcular a posição dos nós
+        edge_x = []
+        edge_y = []
+        for edge in G.edges():
+            x0, y0 = pos[edge[0]]
+            x1, y1 = pos[edge[1]]
+            edge_x.append(x0)
+            edge_x.append(x1)
+            edge_x.append(None)
+            edge_y.append(y0)
+            edge_y.append(y1)
+            edge_y.append(None)
+
+        edge_trace = go.Scatter(
+            x=edge_x, y=edge_y,
+            line=dict(width=0.5, color='#888'),
+            hoverinfo='none',
+            mode='lines')
+
+        node_x = []
+        node_y = []
+        node_text = []
+        for node in G.nodes():
+            x, y = pos[node]
+            node_x.append(x)
+            node_y.append(y)
+            node_text.append(node)
+
+        node_trace = go.Scatter(
+            x=node_x, y=node_y,
+            mode='markers+text',
+            text=node_text,
+            textposition="top center",
+            hoverinfo='text',
+            marker=dict(
+                showscale=True,
+                colorscale='YlGnBu',
+                reversescale=True,
+                color=[],
+                size=10,
+                colorbar=dict(
+                    thickness=15,
+                    title='Mapa Mental',
+                    xanchor='left',
+                    titleside='right'
+                ),
+                line_width=2))
+
+        node_trace.marker.color = [len(G.adj[node]) for node in G.nodes()]
+        node_trace.text = node_text
+
+        # Criar o layout do gráfico
+        fig = go.Figure(data=[edge_trace, node_trace],
+                        layout=go.Layout(
+                            title=f'Mapa Mental - Eixo: {eixo}',
+                            titlefont_size=16,
+                            showlegend=False,
+                            hovermode='closest',
+                            margin=dict(b=20, l=5, r=5, t=40),
+                            annotations=[dict(
+                                text="",
+                                showarrow=False,
+                                xref="paper", yref="paper",
+                                x=0.005, y=-0.002)],
+                            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
+
+        # Exibir o gráfico no Streamlit
+
+        st.plotly_chart(fig, height=600, width=2000)
+
+    with col6:
+
+        st.markdown(f"### Itens de Maturidade - Eixo: {eixo}")
+        st.write("Aqui está uma breve descrição do DataFrame.")
+        df_filtered.index = df_filtered.index+1
+        st.dataframe(df_filtered, column_order=['item','eixo','topico'])
 
 # Exibir a imagem redimensionada
 #st.image('dedad.png', caption='Departamento de Infraestrutura de Dados')
