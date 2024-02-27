@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 db_config = {
     'dbname': 'postgres',
     'user': 'postgres',
-    'password': 'admin',
+    'password': '*****',
     'host': 'localhost',
     'port': '5432'
 }
