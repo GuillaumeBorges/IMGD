@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from database.maturity import get_ind
+from database.maturity import get_ind, get_eixo, get_topico
 import networkx as nx
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
@@ -10,6 +10,8 @@ st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade 
 df = pd.read_excel('autodiagnostico.xlsx')
 # Buscando dados dos Itens
 itens = get_ind()
+eixo = get_eixo()
+topico = get_topico()
 
 def pagina_inicio():
     st.title('Infraestrutura Nacional de Dados')
@@ -128,7 +130,7 @@ def pagina_inicio():
 
         st.markdown(f"### Itens de Maturidade - Eixo: {eixo}")
         st.write("Aqui está uma breve descrição do DataFrame.")
-        df_filtered.index = df_filtered.index+1
+        df_filtered.index = df_filtered.index + 1
         st.dataframe(df_filtered, column_order=['item','eixo','topico'])
 
 # Exibir a imagem redimensionada
@@ -148,16 +150,16 @@ def autodiagnostico():
     col3, col4 = st.columns(2)
 
     cola.metric('Grupo', df['GRUPO'].nunique())
-    colb.metric('Órgãos', df['ORGAO'].nunique())
+    colb.metric('Órgãos', df['orgao'].nunique())
     colc.metric('Média Geral', df['NIVEL'].mean().round(0))
     cold.metric('Itens', itens['item'].count())
 
     # Gráfico Barra Geral
-    fig_data_total = px.bar(df, x='SIGLA', y='NIVEL', color='Ranking', title='Maturidade de Dados - Geral', text='ORGAO')
+    fig_data_total = px.bar(df, x='SIGLA', y='NIVEL', color='Ranking', title='Maturidade de Dados - Geral', text='orgao')
     col1.plotly_chart(fig_data_total, use_container_width=True)
 
     # Gráfico Barra por Grupo
-    fig_data_por_grupo = px.bar(df_filtered, x='SIGLA', y='NIVEL', color='Ranking', title=f'Maturidade de Dados - {grupo.title()}', text='ORGAO')
+    fig_data_por_grupo = px.bar(df_filtered, x='SIGLA', y='NIVEL', color='Ranking', title=f'Maturidade de Dados - {grupo.title()}', text='orgao')
     col2.plotly_chart(fig_data_por_grupo, use_container_width=True)
 
     # Gráfico Barra Média por Grupo
@@ -175,9 +177,34 @@ def autodiagnostico():
     fig_pizza.update_traces(textinfo='value')
     col4.plotly_chart(fig_pizza)
 
-    st.markdown("### Dados do Grupo")
-    st.write("Aqui está uma breve descrição do DataFrame.")
+    st.markdown(f"### Dados do Grupo - {grupo}")
+    st.write("Aqui está uma breve descrição:")
     st.dataframe(df_filtered)
+
+def egd():
+    st.title('EGD -> Estratégia de Dados')
+    st.write('Este projeto visa avaliar e acompanhar as informações do autodiagnóstico para melhorar a governança de dados em diferentes organizações.')
+    st.subheader('Métricas da Estratégia:')
+
+    col1, col2 = st.columns(2)
+
+    df_eixo = eixo
+    fig_pie = px.pie(df_eixo, values='media', names='eixo', title='Eixos da Infraestrutura Nacional de Dados', hole=0.5)
+    fig_pie.update_traces(textinfo='percent + value')
+    col1.plotly_chart(fig_pie, use_container_width=True)
+
+    df_topico = topico
+    fig_pie2 = px.pie(df_topico, values='media', names='topico', title='Tópicos da Maturidade de Dados', hole=0.5)
+    fig_pie2.update_traces(textinfo='percent + value')
+    col2.plotly_chart(fig_pie2, use_container_width=True)
+
+    #col[eixo] = st.columns(len(df_eixo))
+    #col1, col2 = st.columns(2)
+    #col3, col4 = st.columns(2)
+
+
+
+
 def instituicoes():
     st.title('Análise Individual')
     st.write('Teste!')
@@ -203,8 +230,9 @@ def instituicoes():
 
 # Dicionário com o nome e a função de cada página
 paginas = {
-    'Página Inicial': pagina_inicio,
+    'Infraestrutura': pagina_inicio,
     'Autodiagnostico': autodiagnostico,
+    'Estratégia de Dados': egd,
     'Análise Individual': instituicoes
 }
 

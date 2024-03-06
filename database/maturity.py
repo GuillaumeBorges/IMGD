@@ -1,12 +1,13 @@
 import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine
+from datetime import datetime
 
 # Configurações do banco de dados PostgreSQL
 db_config = {
     'dbname': 'postgres',
     'user': 'postgres',
-    'password': '*****',
+    'password': 'admin',
     'host': 'localhost',
     'port': '5432'
 }
@@ -49,6 +50,41 @@ def get_ind():
                        "GROUP BY e.id, e.descricao, t.titulo, i.descricao "
                        "ORDER BY e.id, e.descricao, t.titulo, i.descricao;", get_engine())
 
+def get_eixo():
+    return pd.read_sql("SELECT "
+                       "e.descricao AS Eixo, "
+                       "round(avg(n.valor),2) AS Media "
+                       "FROM "
+                       "eixo e "
+                       "JOIN item i ON e.id = i.eixo_id "
+                       "JOIN imgd m ON i.id = m.item_id "
+                       "JOIN avaliacao a ON m.id = a.imgd_id "
+                       "JOIN nivel n ON n.id = m.nivel_id "
+                       "GROUP BY e.descricao;", get_engine())
+
+def get_topico():
+    return pd.read_sql("SELECT "
+                       "t.titulo AS Topico, "
+                       "round(avg(n.valor),2) AS Media "
+                       "FROM "
+                       "topico t "
+                       "JOIN item i ON t.id = i.topico_id "
+                       "JOIN imgd m ON i.id = m.item_id "
+                       "JOIN avaliacao a ON m.id = a.imgd_id "
+                       "JOIN nivel n ON n.id = m.nivel_id "
+                       "GROUP BY t.titulo;", get_engine())
+
 
 def get_nivel():
-    return pd.read_sql("", get_engine())
+    return pd.read_sql('select * from nivel', get_engine())
+
+def get_imgd(nivel: int, item: int):
+    return pd.read_sql("select i.id from imgd i where i.nivel_id = %s and i.item_id = %s", get_engine(), params=(nivel, item))
+
+def insert_orgao(df: pd.DataFrame):
+    colunas = ['codigoUnidade', 'codigoUnidadePai', 'nome', 'sigla']
+    df = df[colunas]
+    df.to_sql('instituicao', get_engine(), if_exists='append', index=False)
+    print("Dados inseridos com sucesso!")
+
+
