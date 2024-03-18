@@ -81,6 +81,27 @@ def get_nivel():
 def get_imgd(nivel: int, item: int):
     return pd.read_sql("select i.id from imgd i where i.nivel_id = %s and i.item_id = %s", get_engine(), params=(nivel, item))
 
+def get_gov():
+    return pd.read_sql('SELECT i.descricao as Item, ROUND(avg(n.valor), 2) AS Media '
+                       ' FROM item i '
+                       ' JOIN eixo e ON e.id = i.eixo_id '
+                       ' JOIN imgd m ON i.id = m.item_id '
+                       ' JOIN avaliacao a ON m.id = a.imgd_id '
+                       ' JOIN nivel n ON n.id = m.nivel_id '
+                       ' WHERE e.id = 1 '
+                       ' GROUP BY i.descricao', get_engine())
+
+def get_gov2():
+    return pd.read_sql('SELECT i.descricao as Item, ROUND(avg(n.valor), 2) AS Media '
+                       ' FROM item i '
+                       ' JOIN eixo e ON e.id = i.eixo_id '
+                       ' JOIN imgd m ON i.id = m.item_id '
+                       ' JOIN avaliacao a ON m.id = a.imgd_id '
+                       ' JOIN nivel n ON n.id = m.nivel_id '
+                       ' WHERE e.id = 1 '
+                       ' GROUP BY i.descricao '
+                       ' HAVING AVG(n.valor) < 2.00', get_engine())
+
 def insert_orgao(df: pd.DataFrame):
     colunas = ['codigoUnidade', 'codigoUnidadePai', 'nome', 'sigla']
     df = df[colunas]

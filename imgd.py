@@ -1,9 +1,8 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from database.maturity import get_ind, get_eixo, get_topico
+from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2
 import networkx as nx
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade de Governança de Dados')
@@ -12,6 +11,8 @@ df = pd.read_excel('autodiagnostico.xlsx')
 itens = get_ind()
 eixo = get_eixo()
 topico = get_topico()
+gov = get_gov()
+gov2 = get_gov2()
 
 def pagina_inicio():
     st.title('Infraestrutura Nacional de Dados')
@@ -187,6 +188,7 @@ def egd():
     st.subheader('Métricas da Estratégia:')
 
     col1, col2 = st.columns(2)
+    col3, col4 = st.columns(2)
 
     df_eixo = eixo
     fig_pie = px.pie(df_eixo, values='media', names='eixo', title='Eixos da Infraestrutura Nacional de Dados', hole=0.5)
@@ -197,6 +199,16 @@ def egd():
     fig_pie2 = px.pie(df_topico, values='media', names='topico', title='Tópicos da Maturidade de Dados', hole=0.5)
     fig_pie2.update_traces(textinfo='percent + value')
     col2.plotly_chart(fig_pie2, use_container_width=True)
+
+    df_gov = gov
+    fig_pie3 = px.pie(df_gov, values='media', names='item', title='Itens do Eixo de Governança de Dados', hole=0.5, height=500, width=800)
+    fig_pie3.update_traces(textinfo='percent + value')
+    col3.plotly_chart(fig_pie3, use_container_width=True)
+
+    df_gov2 = gov2
+    fig_pie4 = px.pie(df_gov2, values='media', names='item', title='Itens do Eixo de Governança de Dados (< 2,00)', hole=0.5, height=500, width=800)
+    fig_pie4.update_traces(textinfo='percent + value')
+    col4.plotly_chart(fig_pie4, use_container_width=True)
 
     #col[eixo] = st.columns(len(df_eixo))
     #col1, col2 = st.columns(2)
