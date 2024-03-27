@@ -1,18 +1,21 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2
+from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2, get_graphic, get_graphic_pizza
 import networkx as nx
 import plotly.graph_objects as go
 
 st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade de Governança de Dados')
-df = pd.read_excel('autodiagnostico.xlsx')
+
 # Buscando dados dos Itens
 itens = get_ind()
 eixo = get_eixo()
 topico = get_topico()
 gov = get_gov()
 gov2 = get_gov2()
+graphic = get_graphic()
+graphic_pizza = get_graphic_pizza()
+df = graphic
 
 def pagina_inicio():
     st.title('Infraestrutura Nacional de Dados')
@@ -113,6 +116,7 @@ def pagina_inicio():
                             title=f'Mapa Mental - Eixo: {eixo}',
                             titlefont_size=16,
                             showlegend=False,
+
                             hovermode='closest',
                             margin=dict(b=20, l=5, r=5, t=40),
                             annotations=[dict(
@@ -138,49 +142,53 @@ def pagina_inicio():
 #st.image('dedad.png', caption='Departamento de Infraestrutura de Dados')
 
 def autodiagnostico():
+    # Título e descrição
     st.title('Autodiagnóstico da Maturidade de Dados')
     st.write(
         'Este projeto visa avaliar e acompanhar o nível de maturidade da governança de dados em diferentes organizações.')
     st.subheader('Métricas de desempenho:')
 
-    grupo = st.sidebar.selectbox("Grupo", df['GRUPO'].unique())
-    df_filtered = df[df['GRUPO'] == grupo]
+    # Aplicando filtro com base no grupo selecionado
+    grupo = st.sidebar.selectbox("Grupo", df['grupo'].unique())
+    df_filtered = df[df['grupo'] == grupo]
 
+    # Calculando as métricas
     cola, colb, colc, cold = st.columns(4)
     col1, col2 = st.columns(2)
     col3, col4 = st.columns(2)
 
-    cola.metric('Grupo', df['GRUPO'].nunique())
+    # Exibição das métricas
+    cola.metric('Grupo', df['grupo'].nunique())
     colb.metric('Órgãos', df['orgao'].nunique())
-    colc.metric('Média Geral', df['NIVEL'].mean().round(0))
-    cold.metric('Itens', itens['item'].count())
+    colc.metric('Média Geral', df_filtered['media'].mean().round(0))
+    cold.metric('Itens', len(itens))  # Considerando o número total de linhas do DataFrame
 
     # Gráfico Barra Geral
-    fig_data_total = px.bar(df, x='SIGLA', y='NIVEL', color='Ranking', title='Maturidade de Dados - Geral', text='orgao')
+    df['media'] = df['media'].round(0)
+    fig_data_total = px.bar(df, x='sigla', y='media', color='ranking', title='Maturidade de Dados - Geral', text='orgao')
     col1.plotly_chart(fig_data_total, use_container_width=True)
 
     # Gráfico Barra por Grupo
-    fig_data_por_grupo = px.bar(df_filtered, x='SIGLA', y='NIVEL', color='Ranking', title=f'Maturidade de Dados - {grupo.title()}', text='orgao')
+    df_filtered['media'] = df_filtered['media'].round(0)
+    fig_data_por_grupo = px.bar(df_filtered, x='sigla', y='media', color='ranking', title=f'Maturidade de Dados - {grupo.title()}', text='orgao')
     col2.plotly_chart(fig_data_por_grupo, use_container_width=True)
 
     # Gráfico Barra Média por Grupo
-    df_grupo = df.groupby('GRUPO')['NIVEL'].mean().reset_index().round(2)
-    colors = ['< 2' if media < 2 else '> 2' for media in df_grupo['NIVEL']]
-    fig_grupo = px.bar(df_grupo, x='GRUPO', y='NIVEL', title='Média por Grupo', color=colors, color_discrete_map={True: 'red'}, height=500, width=600)
+    df_grupo = df.groupby('grupo')['media'].mean().reset_index().round(2)
+    colors = ['< 2' if media < 2 else '> 2' for media in df_grupo['media']]
+    fig_grupo = px.bar(df_grupo, x='grupo', y='media', title='Média por Grupo', color=colors, color_discrete_map={True: 'red'}, height=500, width=600)
     col3.plotly_chart(fig_grupo)
 
     # Gráfico Pizza Média Itens
-    indices_colunas = list(range(7, 44))  # Selecionando as colunas de 5 a 14
-    df_topicos = df_filtered.iloc[:, indices_colunas]
-    medias_topicos = df_topicos.mean().round(2)
-    df_medias = pd.DataFrame({'Tópicos': medias_topicos.index, 'Médias': medias_topicos.values})
-    fig_pizza = px.pie(df_medias, values='Médias', names='Tópicos', title=f'Médias dos Tópicos - {grupo.title()}', height=600, width=800)
+    df_filtered_pizza = graphic_pizza[graphic_pizza['grupo'] == grupo]
+    fig_pizza = px.pie(df_filtered_pizza, values='media', names='descricao_item', title=f'Médias dos Tópicos - {grupo.title()}', height=600, width=800)
     fig_pizza.update_traces(textinfo='value')
     col4.plotly_chart(fig_pizza)
 
+    # Exibição dos dados do grupo selecionado
     st.markdown(f"### Dados do Grupo - {grupo}")
     st.write("Aqui está uma breve descrição:")
-    st.dataframe(df_filtered)
+    st.dataframe(df_filtered, use_container_width=True)
 
 def egd():
     st.title('EGD -> Estratégia de Dados')

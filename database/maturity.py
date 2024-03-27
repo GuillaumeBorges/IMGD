@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Configurações do banco de dados PostgreSQL
 db_config = {
-    'dbname': 'postgres',
+    'dbname': 'imgd',
     'user': 'postgres',
     'password': 'admin',
     'host': 'localhost',
@@ -101,6 +101,52 @@ def get_gov2():
                        ' WHERE e.id = 1 '
                        ' GROUP BY i.descricao '
                        ' HAVING AVG(n.valor) < 2.00', get_engine())
+
+def get_instituicao():
+    return pd.read_sql("select * from instituicao", get_engine())
+
+def get_avaliacao():
+    return pd.read_sql("select * from avaliacao", get_engine())
+
+def get_graphic():
+    return pd.read_sql("""
+                            SELECT
+                                ins.sigla as SIGLA,
+                                ins.nome AS ORGAO,
+                                sum(n.valor) as Ranking,
+                                round(avg(n.valor), 2) as Media,
+                                a.grupo AS GRUPO
+                            FROM
+                                instituicao ins
+                            JOIN
+                                avaliacao a on ins."codigoUnidade" = a.orgao_id
+                            JOIN
+                                imgd i ON a.imgd_id = i.id
+                            JOIN
+                                nivel n ON i.nivel_id = n.id
+                            GROUP BY
+                                ins.sigla, ins.nome, a.grupo
+                            """, get_engine())
+
+def get_graphic_pizza():
+    return pd.read_sql("""
+                        SELECT
+                            ROUND(AVG(n.valor), 2) AS Media,
+                            a.grupo AS GRUPO,
+                            it.descricao AS DESCRICAO_ITEM
+                        FROM
+                            avaliacao a
+                        JOIN
+                            imgd i ON a.imgd_id = i.id
+                        JOIN
+                            nivel n ON i.nivel_id = n.id
+                        JOIN
+                            item it ON i.item_id = it.id
+                        GROUP BY
+                            a.grupo, it.descricao
+                        ORDER BY
+                            a.grupo;
+                            """, get_engine())
 
 def insert_orgao(df: pd.DataFrame):
     colunas = ['codigoUnidade', 'codigoUnidadePai', 'nome', 'sigla']
