@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Configurações do banco de dados PostgreSQL
 db_config = {
-    'dbname': 'imgd',
+    'dbname': 'postgres',
     'user': 'postgres',
     'password': 'admin',
     'host': 'localhost',
@@ -90,6 +90,27 @@ def get_gov():
                        ' JOIN nivel n ON n.id = m.nivel_id '
                        ' WHERE e.id = 1 '
                        ' GROUP BY i.descricao', get_engine())
+
+def get_itens_eixo():
+    return pd.read_sql('SELECT i.descricao as Item, ROUND(avg(n.valor), 2) AS Media, e.descricao AS Eixo '
+                       ' FROM item i '
+                       ' JOIN eixo e ON e.id = i.eixo_id '
+                       ' JOIN imgd m ON i.id = m.item_id '
+                       ' JOIN avaliacao a ON m.id = a.imgd_id '
+                       ' JOIN nivel n ON n.id = m.nivel_id '
+                       ' GROUP BY i.descricao, e.descricao', get_engine())
+
+
+def get_item():
+    return pd.read_sql('SELECT i.descricao as Item, ROUND(avg(n.valor), 2) AS Media '
+                       ' FROM item i '
+                       ' JOIN eixo e ON e.id = i.eixo_id '
+                       ' JOIN imgd m ON i.id = m.item_id '
+                       ' JOIN avaliacao a ON m.id = a.imgd_id '
+                       ' JOIN nivel n ON n.id = m.nivel_id '
+                       ' GROUP BY i.descricao ORDER BY Media desc', get_engine())
+
+
 
 def get_gov2():
     return pd.read_sql('SELECT i.descricao as Item, ROUND(avg(n.valor), 2) AS Media '
