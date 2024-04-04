@@ -2,13 +2,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2, get_graphic, get_graphic_pizza, \
-    get_item, get_itens_eixo
+    get_item, get_itens_eixo, get_statistics
 import networkx as nx
 import plotly.graph_objects as go
 
 st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade de Governança de Dados')
 
 # Buscando dados dos Itens
+inst_qtd = get_statistics()
 itens_eixo = get_itens_eixo()
 itens = get_ind()
 eixo = get_eixo()
@@ -187,11 +188,18 @@ def autodiagnostico():
     fig_super_barra.update_traces(textposition='outside')
     colsuperbarra[0].plotly_chart(fig_super_barra, use_container_width=True)
 
+    # ['valor', 'nivel', 'instituicoes']
+    fig_nivel = px.bar(inst_qtd, x='nivel', y='instituicoes', title='Quantidade por Nível', text='instituicoes', height=600, width=700)
+    fig_nivel.update_traces(textfont=dict(size=20), textposition='outside')
+    fig_nivel.update_xaxes(title_text='Níveis de Maturidade')
+    fig_nivel.update_yaxes(title_text='Quantidade de Órgãos')
+    col3.plotly_chart(fig_nivel)
+
     # Gráfico Barra Média por Grupo
-    df_grupo = df.groupby('grupo')['media'].mean().reset_index().round(2)
-    colors = ['< 2' if media < 2 else '> 2' for media in df_grupo['media']]
-    fig_grupo = px.bar(df_grupo, x='grupo', y='media', title='Média por Grupo', color=colors, color_discrete_map={True: 'red'}, height=500, width=600)
-    col3.plotly_chart(fig_grupo)
+    #df_grupo = df.groupby('grupo')['media'].mean().reset_index().round(2)
+    #colors = ['< 2' if media < 2 else '> 2' for media in df_grupo['media']]
+    #fig_grupo = px.bar(df_grupo, x='grupo', y='media', title='Média por Grupo', color=colors, color_discrete_map={True: 'red'}, height=500, width=600)
+    #col3.plotly_chart(fig_grupo)
 
     # Gráfico Pizza Média Itens
     #df_filtered_pizza = graphic_pizza[graphic_pizza['grupo'] == grupo]

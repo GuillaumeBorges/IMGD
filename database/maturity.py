@@ -169,6 +169,37 @@ def get_graphic_pizza():
                             a.grupo;
                             """, get_engine())
 
+
+def get_statistics():
+    return pd.read_sql("""
+                        SELECT n.valor as Valor,
+                               n.descricao AS Nivel,
+                               count(Media) AS Instituicoes
+                        FROM(SELECT
+                            ins.sigla as SIGLA,
+                            ins.nome as ORGAO,
+                            round(avg(n.valor), 0) as Media
+                            FROM instituicao ins
+                            JOIN avaliacao a 
+                            ON
+                                ins."codigoUnidade" = a.orgao_id
+                            JOIN imgd i 
+                            ON
+                                a.imgd_id = i.id
+                            JOIN nivel n
+                            ON
+                                i.nivel_id = n.id
+                            GROUP BY ins.sigla, ins.nome
+
+                        ) as instituicoes_por_nivel
+                        JOIN nivel n
+                        ON
+                            instituicoes_por_nivel.Media = n.valor
+                        GROUP BY n.valor, n.descricao
+                        ORDER BY n.valor; 
+                        """, get_engine())
+
+
 def insert_orgao(df: pd.DataFrame):
     colunas = ['codigoUnidade', 'codigoUnidadePai', 'nome', 'sigla']
     df = df[colunas]
