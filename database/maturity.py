@@ -199,6 +199,28 @@ def get_statistics():
                         ORDER BY n.valor; 
                         """, get_engine())
 
+def get_estrategia_dados():
+    return pd.read_sql("""
+                        SELECT
+                            i.descricao AS descricao_item,
+                            n.descricao AS nivel_maturidade,
+                            COUNT(DISTINCT ins."codigoUnidade") AS quantidade_orgaos
+                        FROM
+                            instituicao ins
+                        JOIN
+                            avaliacao av ON ins."codigoUnidade" = av.orgao_id
+                        JOIN
+                            imgd img ON av.imgd_id = img.id
+                        JOIN
+                            nivel n ON img.nivel_id = n.id
+                        JOIN
+                            item i ON img.item_id = i.id
+                        GROUP BY
+                            i.descricao, n.descricao
+                        ORDER BY
+                            i.descricao, n.descricao;
+                        """, get_engine())
+
 
 def insert_orgao(df: pd.DataFrame):
     colunas = ['codigoUnidade', 'codigoUnidadePai', 'nome', 'sigla']

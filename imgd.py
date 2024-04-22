@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2, get_graphic, get_graphic_pizza, \
-    get_item, get_itens_eixo, get_statistics
+    get_item, get_itens_eixo, get_statistics, get_estrategia_dados
 import networkx as nx
 import plotly.graph_objects as go
 
@@ -20,6 +20,7 @@ gov2 = get_gov2()
 graphic = get_graphic()
 graphic_pizza = get_graphic_pizza()
 df = graphic
+graphic_estrategia_dados = get_estrategia_dados()
 
 def pagina_inicio():
     st.title('Infraestrutura Nacional de Dados')
@@ -273,11 +274,81 @@ def instituicoes():
     st.plotly_chart(fig)
 
 
+def estrategia_dados():
+    st.title('Estratégia de Dados - Estratégia do Governo Digital')
+    st.header('Legendas das Cores:')
+
+    # Definindo o mapeamento de cores
+    cores = {
+        'NÃO INICIADO': '#ff0100',
+        'INICIADO': '#ff9800',
+        'EMERGENTE': '#538334',
+        'DESENVOLVIDO': '#0070c0',
+        'OTIMIZADO': '#012060'
+    }
+
+    # Criando o gráfico de barras para exibir as legendas das cores
+    fig_legenda = go.Figure()
+
+    for nivel, cor in cores.items():
+        fig_legenda.add_trace(go.Bar(
+            x=[nivel],
+            y=[1],
+            marker=dict(color=cor),
+            showlegend=False
+        ))
+
+    # Atualizando layout do gráfico de barras das legendas
+    fig_legenda.update_layout(
+        title='     NÃO INICIADO                   INICIADO                    EMERGENTE             DESENVOLVIDO              OTIMIZADO',
+        yaxis=dict(visible=False),
+        xaxis=dict(visible=False),
+        margin=dict(l=0, r=0, t=30, b=0),
+        height=100
+    )
+
+    # Exibindo o gráfico de barras das legendas
+    st.plotly_chart(fig_legenda)
+
+    # Definindo os itens e os filtros
+    itens_filtros = {
+        'Estratégia de Uso dos Dados': 'Estratégia de Uso dos Dados',
+        'Princípios e Políticas de Dados': 'Princípios e Políticas de Dados',
+        'Estrutura Organizacional para Governança de Dados': 'Estrutura Organizacional para Governança de Dados',
+        'Gestão Orientada a Dados (Data-Driven, em inglês)': 'Gestão Orientada a Dados (Data-Driven, em inglês)',
+        'Gestão de Metadados': 'Gestão de Metadados'
+    }
+
+    col1, col2, col3 = st.columns(3)
+    col4, col5 = st.columns(2)
+
+    # Criando os gráficos de rosca para cada item
+    for i, (titulo, descricao_item) in enumerate(itens_filtros.items(), 1):
+        # Filtrando os dados para o item atual
+        df_filtrado = graphic_estrategia_dados[graphic_estrategia_dados['descricao_item'] == descricao_item]
+        fig = px.pie(df_filtrado, values='quantidade_orgaos', names='nivel_maturidade',
+                     title=titulo, hole=0.5, color='nivel_maturidade', color_discrete_map=cores)
+        fig.update_traces(textinfo='value+percent')
+        fig.update_layout(showlegend=False, title_font_size=26)
+
+        # Exibindo o gráfico de rosca na coluna correspondente
+        if i == 1:
+            col1.plotly_chart(fig, use_container_width=True)
+        elif i == 2:
+            col2.plotly_chart(fig, use_container_width=True)
+        elif i == 3:
+            col3.plotly_chart(fig, use_container_width=True)
+        elif i == 4:
+            col4.plotly_chart(fig, use_container_width=True)
+        elif i == 5:
+            col5.plotly_chart(fig, use_container_width=True)
+
 # Dicionário com o nome e a função de cada página
 paginas = {
     'Infraestrutura Nacional de Dados': pagina_inicio,
     'Autodiagnóstico': autodiagnostico,
-    'Governança de Dados': egd
+    'Governança de Dados': egd,
+    'Estratégia de Dados': estrategia_dados
 }
 
 # Barra lateral para selecionar a página
