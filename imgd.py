@@ -275,6 +275,7 @@ def instituicoes():
 
 
 def estrategia_dados():
+    # Título principal e descrição
     st.title('Estratégia de Dados - Estratégia do Governo Digital')
     st.header('Legendas das Cores:')
 
@@ -310,38 +311,37 @@ def estrategia_dados():
     # Exibindo o gráfico de barras das legendas
     st.plotly_chart(fig_legenda)
 
-    # Definindo os itens e os filtros
-    itens_filtros = {
-        'Estratégia de Uso dos Dados': 'Estratégia de Uso dos Dados',
-        'Princípios e Políticas de Dados': 'Princípios e Políticas de Dados',
-        'Estrutura Organizacional para Governança de Dados': 'Estrutura Organizacional para Governança de Dados',
-        'Gestão Orientada a Dados (Data-Driven, em inglês)': 'Gestão Orientada a Dados (Data-Driven, em inglês)',
-        'Gestão de Metadados': 'Gestão de Metadados'
-    }
+    # Criando as abas para cada eixo
+    with st.sidebar:
+        eixos = sorted(graphic_estrategia_dados['eixo'].unique())
+        aba_selecionada = st.radio("Selecione o eixo:", eixos)
 
-    col1, col2, col3 = st.columns(3)
-    col4, col5 = st.columns(2)
+    # Filtrando os dados pelo eixo selecionado
+    graficos_eixo = graphic_estrategia_dados[graphic_estrategia_dados['eixo'] == aba_selecionada]
 
-    # Criando os gráficos de rosca para cada item
-    for i, (titulo, descricao_item) in enumerate(itens_filtros.items(), 1):
-        # Filtrando os dados para o item atual
-        df_filtrado = graphic_estrategia_dados[graphic_estrategia_dados['descricao_item'] == descricao_item]
-        fig = px.pie(df_filtrado, values='quantidade_orgaos', names='nivel_maturidade',
-                     title=titulo, hole=0.5, color='nivel_maturidade', color_discrete_map=cores)
-        fig.update_traces(textinfo='value+percent')
-        fig.update_layout(showlegend=False, title_font_size=26)
+    # Organizando os gráficos em linhas com até três gráficos cada
+    num_colunas = 3
+    num_graficos = len(graficos_eixo['descricao_item'].unique())
+    num_linhas = (num_graficos - 1) // num_colunas + 1
 
-        # Exibindo o gráfico de rosca na coluna correspondente
-        if i == 1:
-            col1.plotly_chart(fig, use_container_width=True)
-        elif i == 2:
-            col2.plotly_chart(fig, use_container_width=True)
-        elif i == 3:
-            col3.plotly_chart(fig, use_container_width=True)
-        elif i == 4:
-            col4.plotly_chart(fig, use_container_width=True)
-        elif i == 5:
-            col5.plotly_chart(fig, use_container_width=True)
+    # Exibindo os gráficos dentro de abas
+    with st.container():
+        for i in range(num_linhas):
+            graficos_linha = graficos_eixo['descricao_item'].unique()[i * num_colunas:(i + 1) * num_colunas]
+            col1, col2, col3 = st.columns(num_colunas)
+            for j, item in enumerate(graficos_linha):
+                df_item = graficos_eixo[graficos_eixo['descricao_item'] == item]
+                fig = px.pie(df_item, values='quantidade_orgaos', names='nivel_maturidade',
+                             title=f'{item}', hole=0.5, color='nivel_maturidade', color_discrete_map=cores)
+                fig.update_traces(textinfo='value+percent')
+                fig.update_layout(showlegend=False, title_font_size=26)
+                if j == 0:
+                    col1.plotly_chart(fig, use_container_width=True)
+                elif j == 1:
+                    col2.plotly_chart(fig, use_container_width=True)
+                elif j == 2:
+                    col3.plotly_chart(fig, use_container_width=True)
+
 
 # Dicionário com o nome e a função de cada página
 paginas = {

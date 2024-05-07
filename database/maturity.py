@@ -202,6 +202,7 @@ def get_statistics():
 def get_estrategia_dados():
     return pd.read_sql("""
                         SELECT
+                            e.descricao AS eixo,
                             i.descricao AS descricao_item,
                             n.descricao AS nivel_maturidade,
                             COUNT(DISTINCT ins."codigoUnidade") AS quantidade_orgaos
@@ -215,12 +216,13 @@ def get_estrategia_dados():
                             nivel n ON img.nivel_id = n.id
                         JOIN
                             item i ON img.item_id = i.id
+                        JOIN
+                            eixo e ON i.eixo_id = e.id
                         GROUP BY
-                            i.descricao, n.descricao
+                            e.descricao, i.descricao, n.descricao
                         ORDER BY
-                            i.descricao, n.descricao;
+                            e.descricao, i.descricao, n.descricao;
                         """, get_engine())
-
 
 def insert_orgao(df: pd.DataFrame):
     colunas = ['codigoUnidade', 'codigoUnidadePai', 'nome', 'sigla']
