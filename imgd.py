@@ -1,26 +1,26 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2, get_graphic, get_graphic_pizza, \
-    get_item, get_itens_eixo, get_statistics, get_estrategia_dados
+#from database.maturity import get_ind, get_eixo, get_topico, get_gov, get_gov2, get_graphic, get_graphic_pizza, \
+#    get_item, get_itens_eixo, get_statistics, get_estrategia_dados
 import networkx as nx
 import plotly.graph_objects as go
 
 st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade de Governança de Dados')
 
-# Buscando dados dos Itens
-inst_qtd = get_statistics()
-itens_eixo = get_itens_eixo()
-itens = get_ind()
-eixo = get_eixo()
-topico = get_topico()
-item = get_item()
-gov = get_gov()
-gov2 = get_gov2()
-graphic = get_graphic()
-graphic_pizza = get_graphic_pizza()
-df = graphic
-graphic_estrategia_dados = get_estrategia_dados()
+# Carregar os dados do Excel
+file_path = 'consolidado.xlsx'
+inst_qtd = pd.read_excel(file_path, sheet_name='statistics')
+itens_eixo = pd.read_excel(file_path, sheet_name='itens_eixo')
+itens = pd.read_excel(file_path, sheet_name='ind')
+eixo = pd.read_excel(file_path, sheet_name='eixo')
+topico = pd.read_excel(file_path, sheet_name='topico')
+item = pd.read_excel(file_path, sheet_name='item')
+gov = pd.read_excel(file_path, sheet_name='gov')
+gov2 = pd.read_excel(file_path, sheet_name='gov2')
+df = pd.read_excel(file_path, sheet_name='graphic')
+graphic_pizza = pd.read_excel(file_path, sheet_name='graphic_pizza')
+graphic_estrategia_dados = pd.read_excel(file_path, sheet_name='estrategia_dados')
 
 def pagina_inicio():
     st.title('Infraestrutura Nacional de Dados')
