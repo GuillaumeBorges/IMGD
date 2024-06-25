@@ -5,11 +5,11 @@ from datetime import datetime
 
 # Configurações do banco de dados PostgreSQL
 db_config = {
-    'dbname': 'postgres',
-    'user': 'postgres',
-    'password': 'admin',
-    'host': 'localhost',
-    'port': '5432'
+    'dbname': '****',
+    'user': '****',
+    'password': '****',
+    'host': '****',
+    'port': '****'
 }
 conn = None
 ind = None

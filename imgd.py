@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 st.set_page_config(layout='wide', page_icon='icon.jpeg', page_title='Maturidade de Governança de Dados')
 
 # Carregar os dados do Excel
-file_path = 'consolidado.xlsx'
+file_path = 'consolidado_anonimizada.xlsx'
 inst_qtd = pd.read_excel(file_path, sheet_name='statistics')
 itens_eixo = pd.read_excel(file_path, sheet_name='itens_eixo')
 itens = pd.read_excel(file_path, sheet_name='ind')
@@ -190,7 +190,7 @@ def autodiagnostico():
     colsuperbarra[0].plotly_chart(fig_super_barra, use_container_width=True)
 
     # ['valor', 'nivel', 'instituicoes']
-    fig_nivel = px.bar(inst_qtd, x='nivel', y='instituicoes', title='Quantidade por Nível', text='instituicoes', height=600, width=700)
+    fig_nivel = px.bar(inst_qtd, x='nivel', y='instituicoes', title='Quantidade por Nível', text='instituicoes', color=['#FF110C','#FA7017','#336DBB','#FFA500','#38B6FF'], height=600, width=700)
     fig_nivel.update_traces(textfont=dict(size=20), textposition='outside')
     fig_nivel.update_xaxes(title_text='Níveis de Maturidade')
     fig_nivel.update_yaxes(title_text='Quantidade de Órgãos')
