@@ -1,5 +1,5 @@
 import pandas as pd
-import psycopg2
+#import psycopg2
 from sqlalchemy import create_engine
 from datetime import datetime
 
@@ -18,21 +18,22 @@ nivel = None
 
 # Conectar ao banco de dados PostgreSQL
 def get_engine():
-    try:
-        conn = psycopg2.connect(**db_config)
-        print("Conexão realizada com sucesso!")
-        #cursor = conn.cursor()
+    print('sem uso para o momento')
+#    try:
+#        conn = psycopg2.connect(**db_config)
+#        print("Conexão realizada com sucesso!")
+#        #cursor = conn.cursor()
 
         # Inserir dados na tabela
-        return create_engine(f'postgresql+psycopg2://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}:{db_config["port"]}/{db_config["dbname"]}')
+#        return create_engine(f'postgresql+psycopg2://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}:{db_config["port"]}/{db_config["dbname"]}')
         #dados_excel.to_sql('sua_tabela', engine, if_exists='replace', index=False)
-    except psycopg2.Error as e:
-        print("Erro ao conectar ao banco de dados:", e)
+#    except psycopg2.Error as e:
+#        print("Erro ao conectar ao banco de dados:", e)
 
-    finally:
-        if conn is not None:
-            print("Conexão finalizada!")
-            conn.close()
+#    finally:
+#        if conn is not None:
+#            print("Conexão finalizada!")
+#            conn.close()
 
 
 def get_itens():
