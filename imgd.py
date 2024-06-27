@@ -22,10 +22,55 @@ df = pd.read_excel(file_path, sheet_name='graphic')
 graphic_pizza = pd.read_excel(file_path, sheet_name='graphic_pizza')
 graphic_estrategia_dados = pd.read_excel(file_path, sheet_name='estrategia_dados')
 
+
 def pagina_inicio():
+    st.title("Bem-vindo ao Portal de Maturidade de Dados")
+
+    st.header("Sobre o Modelo de Maturidade de Dados")
+    st.write("""
+        O Modelo de Maturidade de Dados é uma ferramenta essencial para avaliar e acompanhar o nível de governança de dados em diferentes organizações. 
+        Ele permite identificar pontos fortes e áreas que necessitam de melhoria, fornecendo uma visão clara do estado atual da maturidade de dados e orientando o planejamento estratégico.
+
+        Este modelo consiste em cinco níveis, que refletem o grau de desenvolvimento e institucionalização da Governança de Dados:
+        """)
+    st.markdown("""
+        <ul style="list-style-type: none;">
+            <li><span style='display:inline-block; width:12px; height:12px; background-color:#ff0100; margin-right:10px;'></span><strong>1. Não Iniciado:</strong> Neste estágio, não há iniciativas para tratar o tema da Governança de Dados, ou não é considerado relevante.</li>
+            <li><span style='display:inline-block; width:12px; height:12px; background-color:#ff9800; margin-right:10px;'></span><strong>2. Iniciado:</strong> O tema é abordado de forma ad-hoc ou reativa, muitas vezes em resposta a exigências legais.</li>
+            <li><span style='display:inline-block; width:12px; height:12px; background-color:#538334; margin-right:10px;'></span><strong>3. Emergente:</strong> A Governança de Dados é considerada e tratada de maneira formal, porém sem abrangência organizacional completa.</li>
+            <li><span style='display:inline-block; width:12px; height:12px; background-color:#0070c0; margin-right:10px;'></span><strong>4. Desenvolvido:</strong> Neste nível, a Governança de Dados é institucionalizada e abordada estrategicamente, com recursos adequados para sua implementação.</li>
+            <li><span style='display:inline-block; width:12px; height:12px; background-color:#012060; margin-right:10px;'></span><strong>5. Otimizado:</strong> O estágio mais avançado, onde há uma revisão periódica constante para otimização contínua da Governança de Dados, buscando a excelência na gestão dos dados.</li>
+        </ul>
+        """, unsafe_allow_html=True)
+
+    st.header("Apuração de 2023")
+    st.write("""
+        A apuração de 2023 reflete o progresso alcançado por diversas organizações ao longo do ano. 
+        Os dados foram coletados e analisados para oferecer uma visão abrangente do nível de maturidade de dados em diferentes setores.
+        """)
+
+    st.subheader("Principais Destaques")
+    st.write("""
+        - **Gestão de Metadados:** Avanços significativos na organização e catalogação dos dados.
+        - **Políticas de Dados:** Implementação de novas políticas para assegurar a qualidade e a segurança dos dados.
+        - **Inteligência de Negócios:** Adoção de práticas que melhoram a tomada de decisões estratégicas baseadas em dados.
+        """)
+
+    st.subheader("Tendências Observadas")
+    st.write("""
+        - **Aumento na Adoção de Tecnologias de Dados:** Crescente utilização de ferramentas e plataformas de análise de dados.
+        - **Integração de Sistemas:** Melhorias na interoperabilidade e na integração de diferentes sistemas de dados.
+        - **Capacitação e Treinamento:** Maior investimento em capacitação de profissionais para a governança de dados.
+        """)
+
+    st.markdown("""
+        <div style="text-align:center; margin-top: 20px;">
+            <a class="btn btn-primary" href="https://www.gov.br/governodigital/pt-br/infraestrutura-nacional-de-dados/maturidade-de-dados/" target="_blank" style="background-color: #007bff; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 5px;">Conheça a página do Modelo</a>
+        </div>
+        """, unsafe_allow_html=True)
+
+def infraestrutura_nacional():
     st.title('Infraestrutura Nacional de Dados')
-    st.write(
-        'Este projeto visa avaliar e acompanhar o nível de maturidade da governança de dados em diferentes organizações.')
     st.subheader('Métricas da Estrutura:')
 
     eixo = st.sidebar.selectbox("Eixo", itens['eixo'].unique())
@@ -345,7 +390,8 @@ def estrategia_dados():
 
 # Dicionário com o nome e a função de cada página
 paginas = {
-    'Infraestrutura Nacional de Dados': pagina_inicio,
+    'Página Inicial': pagina_inicio,
+    'Infraestrutura Nacional de Dados': infraestrutura_nacional,
     'Autodiagnóstico': autodiagnostico,
     'Governança de Dados': egd,
     'Estratégia de Dados': estrategia_dados
